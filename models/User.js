@@ -1,33 +1,40 @@
 const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 const mongoosePaginate = require('mongoose-paginate-v2');
-const UsuariosSchema = mongoose.Schema({
+const UsersSchema = mongoose.Schema({
     user: {
         type: String,
         trim: true,
         required: true,
-        trim: true,
         unique: true,
     },
     password: {
         type: String,
         trim: true,
         required: true,
-        trim: true,
     },
-    registro: {
+    register: {
         type: Date,
         default: Date.now()
     },
-    actualizacion: {
+    update: {
         type: Date,
         default: Date.now()
     },
-    empleado: {
+    type: {
+        type: Array,
+        required: true
+    },
+    employee: {
         type: Schema.ObjectId,
-        ref: 'Empleados',
+        ref: 'Employees',
         required: true,
+    },
+    state: {
+        type: Boolean,
+        required: true,
+        default: true,
     }
 });
-UsuariosSchema.plugin(mongoosePaginate)
-module.exports = mongoose.model('Usuarios', UsuariosSchema);
+UsersSchema.plugin(mongoosePaginate)
+module.exports = mongoose.model('Users', UsersSchema);

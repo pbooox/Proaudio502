@@ -1,7 +1,4 @@
-const req = require('express/lib/request');
-const res = require('express/lib/response');
-const Product = require('../../models/Products/Product');
-// const escapeStringRegexp = require('escape-string-regexp');
+const Inventory = require('../../models/Inventory/Inventory');
 
 exports.list =  async(req, res) => {
     let actualPage = parseInt(req.query.page);
@@ -9,9 +6,6 @@ exports.list =  async(req, res) => {
     let filter = req.query.criterio;
     let search = req.query.search;
     let order = req.query.order;
-    let columna = req.query.columna;
-
-    // console.log(columna)
     // if(!order){
     //     filter='registro';
     //     order='asc';
@@ -22,26 +16,41 @@ exports.list =  async(req, res) => {
    
    
     const regex = new RegExp(search, 'i');
-    // console.log('//////////////////////////////////////////////////////////')
-    // console.log(regex)
-    // result= await  Product.paginate({[columna]:regex},{limit:perPage,page:actualPage,sort:{[filter]:[order]},populate:[
-    result= await  Product.paginate({limit:perPage,page:actualPage,sort:{[filter]:[order]},populate:[
+    console.log(regex)
+
+    // result1 = await Inventory.find({name: regex}).populate('product');
+    // console.log(result1)
+    result= await  Inventory.paginate({'name': regex},{limit:perPage,page:actualPage,sort:{[filter]:[order]}
+        ,populate:[
         {
-            path: 'type',
-            select: '_id name',
-            match: { name: regex}
+            path: 'product',
+            select: '_id name barCode',
+            populate: [
+                {
+                    path: 'type',
+                    select: '_id name'
+                },
+                {
+                    path: 'brand',
+                    select: '_id name'
+                }
+            ]
         },
         {
-            path: 'brand',
+            path: 'store',
             select: '_id name'
         }
-    ]});
-    // console.log(result)
-    
-    // console.log(result)
+        // {
+        //     path: 'brand',
+        //     select: '_id name'
+        // }
+    ],
+}
+    );
+    console.log(result)
        
     if (result.length === 0) {
-        return res.send('No se encontraron productos');
+        return res.send('No se encontraron inventarios');
     }
     else {
         let pagination = {
@@ -58,42 +67,35 @@ exports.list =  async(req, res) => {
     }
 }
 
-
-
 exports.create = async (req, res) => {
-    console.log(req.body)
-    let form = req.body.form
-    const product = new Product({
-        name: form.name,
-        barCode: form.barCode,
-        description: form.description,
+    // console.log(req.body)
+    let form = req.body.form;
+    const inventory = new Inventory({
+        price: form.price,
+        minimalPrice: form.minimalPrice,
         purchasePrice: form.purchasePrice,
-        seller: form.seller,
-        installation: form.installation,
-        storePrice: form.storePrice,
-        distPrice: form.distPrice,
-        // photo: req.body.fotografia,
-        type: req.body.form.type,
-        brand: req.body.form.brand,
+        stock: form.stock,
+        store: form.store,
+        product: form.product,
+        employee: form.employee
     });
 
-    product.save(function (err, product) {
+    inventory.save(function (err, inventory) {
         if (err) return res.send(500, err.message);
-        res.status(200).jsonp(product);
+        res.status(200).jsonp(inventory);
     });
 }
 
 exports.update = async (req, res) => {
     const body = req.body;
     // console.log(body)
-    Product.updateOne({ _id: body.form.id }, {
+    Inventory.updateOne({ _id: body.form.id }, {
         $set: {
-            name: req.body.form.name,
-            barCode: req.body.form.barCode,
-            description: req.body.form.description,
-            // photo: req.body.fotografia,
-            type: req.body.form.type,
-            brand: req.body.form.brand,
+            price: req.body.form.price,
+            minimalPrice: req.body.form.minimalPrice,
+            purchasePrice: req.body.form.purchasePrice,
+            stock: req.body.form.stock,
+            product: req.body.form.product,
             update: Date.now(),
         }
     },
@@ -101,7 +103,7 @@ exports.update = async (req, res) => {
             if (err) {
                 res.json({
                     resultado: false,
-                    msg: 'No se pudo actualizar el producto',
+                    msg: 'No se pudo actualizar el inventario',
                     err
                 });
             }
@@ -114,10 +116,9 @@ exports.update = async (req, res) => {
         }
     )
 }
-
 exports.activate = async (req, res) => {
     const body = req.body;
-    Product.updateOne({ _id: body.id }, {
+    Inventory.updateOne({ _id: body.id }, {
         $set: {
             update: Date.now(),
             state: true
@@ -127,7 +128,7 @@ exports.activate = async (req, res) => {
             if (err) {
                 res.json({
                     resultado: false,
-                    msg: 'No se pudo activar el producto',
+                    msg: 'No se pudo activar el inventario',
                     err
                 });
             }
@@ -142,7 +143,7 @@ exports.activate = async (req, res) => {
 }
 exports.deactivate = async (req, res) => {
     const body = req.body;
-    Product.updateOne({ _id: body.id }, {
+    Inventory.updateOne({ _id: body.id }, {
         $set: {
             update: Date.now(),
             state: false
@@ -152,7 +153,7 @@ exports.deactivate = async (req, res) => {
             if (err) {
                 res.json({
                     resultado: false,
-                    msg: 'No se pudo desactivar el producto',
+                    msg: 'No se pudo desactivar el inventario',
                     err
                 });
             }
@@ -164,16 +165,4 @@ exports.deactivate = async (req, res) => {
             }
         }
     )
-}
-
-exports.searchSelect = async (req, res) => {
-    const products = await Product.find({name: {$regex:req.query.search}})
-    .populate("type").populate("brand");
-    // console.log(products)
-    if (products.length === 0) {
-        return res.send('No se encontraron productos');
-    }
-    else {
-        res.send(products);
-    }
 }

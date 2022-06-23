@@ -1,3 +1,4 @@
+const { lookup } = require('shortid/lib/alphabet');
 const Employees = require('../../models/Employees/Employees');
 
 exports.list =  async(req, res) => {
@@ -134,4 +135,27 @@ exports.deactivate = async (req, res) => {
             }
         }
     )
+}
+
+exports.getEmployees = async (req, res) => {
+    const employees = await Employees.find();
+
+    if (employees.length === 0) {
+        return res.send('No se encontraron empleados');
+    }
+    else {
+        res.send(employees);
+    }
+
+    // const employees = await Employees.aggregate().lookup({
+    //         from: 'users',
+    //         localField: '_id',
+    //         foreignField: 'employee',
+    //         as: 'employees' 
+        
+    // });
+    
+    // console.log(employees)
+    // console.log('////////')
+    // res.send(employees)
 }

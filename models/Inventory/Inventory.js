@@ -1,52 +1,37 @@
 const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 const mongoosePaginate = require('mongoose-paginate-v2');
-const ProductSchema = mongoose.Schema({
-    name: {
+const InventorySchema = mongoose.Schema({
+    price: {
         type: String,
-        trim: true,
         required: true,
     },
-    barCode: {
+    minimalPrice: {
         type: String,
-        trim: true,
-    },
-    description: {
-        type: String,
-        trim: true,
+        required: true
     },
     purchasePrice: {
         type: String,
-        trim: true,
+        required: true
     },
-    seller: {
+    stock: {
         type: String,
-        trim: true,
-    },
-    installation: {
-        type: String,
-        trim: true,
-    },
-    storePrice: {
-        type: String,
-        trim: true,
-    },
-    distPrice: {
-        type: String,
-        trim: true,
-    },
-    photo: {
-        type: Array,
-    },
-    type: {
-        type: Schema.ObjectId,
-        ref: 'Type',
         required: true,
     },
-    brand: {
+    store: {
         type: Schema.ObjectId,
-        ref: 'Brand',
+        ref: 'Store',
         required: true,
+    },
+    product: {
+        type: Schema.ObjectId,
+        ref: 'Product',
+        required: true,
+    },
+    employee: {
+        type: Schema.ObjectId,
+        ref: 'Employees',
+        required: false,
     },
     register: {
         type: Date,
@@ -62,5 +47,5 @@ const ProductSchema = mongoose.Schema({
         default: true,
     },
 });
-ProductSchema.plugin(mongoosePaginate)
-module.exports = mongoose.model('Product', ProductSchema);
+InventorySchema.plugin(mongoosePaginate)
+module.exports = mongoose.model('Inventory', InventorySchema);

@@ -18,7 +18,7 @@ exports.list =  async(req, res) => {
     const regex = new RegExp(search, 'i');
     // console.log(regex)
     result= await Provider.paginate({name:regex},{limit:perPage,page:actualPage,sort:{[filter]:[order]}});
-    console.log(result)
+    // console.log(result)
        
     if (result.length === 0) {
         return res.send('No se encontraron empleados');
@@ -59,7 +59,7 @@ exports.create =  async (req, res) => {
 
 exports.update = async (req, res) => {
     const body = req.body;
-    console.log(body)
+    // console.log(body)
     Provider.updateOne({ _id: body.form.id }, {
         $set: {
             businessName: req.body.form.businessName,

@@ -20,11 +20,14 @@ const EmployeesSchema = mongoose.Schema({
     mail: {
         type: String,
         trim: true,
+        required: true,
+        unique: true
     },
     cui: {
         type: String,
         trim: true,
         required: true,
+        unique: true,
     },
     register: {
         type: Date,

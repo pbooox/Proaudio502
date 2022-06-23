@@ -1,17 +1,11 @@
-const req = require('express/lib/request');
-const res = require('express/lib/response');
-const Product = require('../../models/Products/Product');
-// const escapeStringRegexp = require('escape-string-regexp');
+const Store = require('../../models/Inventory/Store');
 
-exports.list =  async(req, res) => {
+exports.list = async (req, res) =>{
     let actualPage = parseInt(req.query.page);
     let perPage = parseInt(req.query.limit);
     let filter = req.query.criterio;
     let search = req.query.search;
     let order = req.query.order;
-    let columna = req.query.columna;
-
-    // console.log(columna)
     // if(!order){
     //     filter='registro';
     //     order='asc';
@@ -22,26 +16,12 @@ exports.list =  async(req, res) => {
    
    
     const regex = new RegExp(search, 'i');
-    // console.log('//////////////////////////////////////////////////////////')
     // console.log(regex)
-    // result= await  Product.paginate({[columna]:regex},{limit:perPage,page:actualPage,sort:{[filter]:[order]},populate:[
-    result= await  Product.paginate({limit:perPage,page:actualPage,sort:{[filter]:[order]},populate:[
-        {
-            path: 'type',
-            select: '_id name',
-            match: { name: regex}
-        },
-        {
-            path: 'brand',
-            select: '_id name'
-        }
-    ]});
-    // console.log(result)
-    
+    result= await Store.paginate({name:regex},{limit:perPage,page:actualPage,sort:{[filter]:[order]}});
     // console.log(result)
        
     if (result.length === 0) {
-        return res.send('No se encontraron productos');
+        return res.send('No se encontraron tiendas');
     }
     else {
         let pagination = {
@@ -58,42 +38,29 @@ exports.list =  async(req, res) => {
     }
 }
 
-
-
-exports.create = async (req, res) => {
-    console.log(req.body)
-    let form = req.body.form
-    const product = new Product({
+exports.create =  async (req, res) => {
+    let form = req.body.form;
+    const store = new Store({
         name: form.name,
-        barCode: form.barCode,
-        description: form.description,
-        purchasePrice: form.purchasePrice,
-        seller: form.seller,
-        installation: form.installation,
-        storePrice: form.storePrice,
-        distPrice: form.distPrice,
-        // photo: req.body.fotografia,
-        type: req.body.form.type,
-        brand: req.body.form.brand,
+        location: form.location,
+        address: form.address,
+        state: true
     });
 
-    product.save(function (err, product) {
+    store.save(function (err, store) {
         if (err) return res.send(500, err.message);
-        res.status(200).jsonp(product);
+        res.status(200).jsonp(store);
     });
 }
 
 exports.update = async (req, res) => {
-    const body = req.body;
+    const form = req.body.form;
     // console.log(body)
-    Product.updateOne({ _id: body.form.id }, {
+    Store.updateOne({ _id: form.id }, {
         $set: {
-            name: req.body.form.name,
-            barCode: req.body.form.barCode,
-            description: req.body.form.description,
-            // photo: req.body.fotografia,
-            type: req.body.form.type,
-            brand: req.body.form.brand,
+            name: form.name,
+            location: form.location,
+            address: form.address,
             update: Date.now(),
         }
     },
@@ -101,7 +68,7 @@ exports.update = async (req, res) => {
             if (err) {
                 res.json({
                     resultado: false,
-                    msg: 'No se pudo actualizar el producto',
+                    msg: 'No se pudo actualizar la tienda',
                     err
                 });
             }
@@ -114,10 +81,9 @@ exports.update = async (req, res) => {
         }
     )
 }
-
 exports.activate = async (req, res) => {
     const body = req.body;
-    Product.updateOne({ _id: body.id }, {
+    Store.updateOne({ _id: body.id }, {
         $set: {
             update: Date.now(),
             state: true
@@ -127,7 +93,7 @@ exports.activate = async (req, res) => {
             if (err) {
                 res.json({
                     resultado: false,
-                    msg: 'No se pudo activar el producto',
+                    msg: 'No se pudo activar la marca',
                     err
                 });
             }
@@ -142,7 +108,7 @@ exports.activate = async (req, res) => {
 }
 exports.deactivate = async (req, res) => {
     const body = req.body;
-    Product.updateOne({ _id: body.id }, {
+    Store.updateOne({ _id: body.id }, {
         $set: {
             update: Date.now(),
             state: false
@@ -152,7 +118,7 @@ exports.deactivate = async (req, res) => {
             if (err) {
                 res.json({
                     resultado: false,
-                    msg: 'No se pudo desactivar el producto',
+                    msg: 'No se pudo desactivar la marca',
                     err
                 });
             }
@@ -166,14 +132,13 @@ exports.deactivate = async (req, res) => {
     )
 }
 
-exports.searchSelect = async (req, res) => {
-    const products = await Product.find({name: {$regex:req.query.search}})
-    .populate("type").populate("brand");
-    // console.log(products)
-    if (products.length === 0) {
-        return res.send('No se encontraron productos');
+exports.get = async (req, res) => {
+    const stores = await Store.find();
+
+    if (stores.length === 0) {
+        return res.send('No se encontraron tiendas');
     }
     else {
-        res.send(products);
+        res.send(stores);
     }
 }

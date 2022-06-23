@@ -18,7 +18,7 @@ exports.list =  async(req, res) => {
     const regex = new RegExp(search, 'i');
     // console.log(regex)
     result= await Type.paginate({name:regex},{limit:perPage,page:actualPage,sort:{[filter]:[order]}});
-    console.log(result)
+    // console.log(result)
        
     if (result.length === 0) {
         return res.send('No se encontraron tipos');
@@ -52,7 +52,7 @@ exports.create =  async (req, res) => {
 
 exports.update = async (req, res) => {
     const body = req.body;
-    console.log(body)
+    // console.log(body)
     Type.updateOne({ _id: body.form.id }, {
         $set: {
             name: req.body.form.name,
@@ -125,4 +125,15 @@ exports.deactivate = async (req, res) => {
             }
         }
     )
+}
+
+exports.get = async (req, res) => {
+    const types = await Type.find();
+
+    if (types.length === 0) {
+        return res.send('No se encontraron tipos');
+    }
+    else {
+        res.send(types);
+    }
 }
